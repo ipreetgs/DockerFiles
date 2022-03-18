@@ -1,0 +1,29 @@
+
+docker network ls
+
+docker network inspect bridge
+
+docker network create alpine-net
+
+Exit Container Shell
+===============
+Ctrl + p and Ctrl + q
+
+Default Bridge:
+============
+docker run -dit --name alpine1 alpine ash
+docker run -dit --name alpine2 alpine ash
+
+User Created Bridge:
+================
+
+docker run -dit --name alpine3 --net alpine-net alpine ash
+docker run -dit --name alpine4 --net alpine-net alpine ash
+
+None Network:
+===========
+docker run -dit --name alpine5 --net none alpine ash
+
+Host Network:
+===========
+docker run -dit --name alpine6 --net host alpine ash

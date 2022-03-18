@@ -1,0 +1,4 @@
+sudo apt update
+kali@kali:~$ sudo apt install -y docker.io
+kali@kali:~$
+kali@kali:~$ sudo systemctl enable docker --now
