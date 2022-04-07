@@ -1,0 +1,151 @@
+Kubernetes Installation and Configuration
+=========================================
+
+In Kubernetes setup we have one master node and multiple nodes. Cluster nodes is known as worker node or Minion. From the master node we manage the cluster and its nodes using ‘kubeadm‘ and ‘kubectl‘  command.
+
+
+Kubernetes can be installed and deployed using following methods:
+
+	Minikube ( It is a single node kubernetes cluster)
+	Kops ( Multi node kubernetes setup into AWS )
+	Kubeadm ( Multi Node Cluster in our own premises)
+
+We will install latest version of Kubernetes 1.7 on CentOS 7 / RHEL 7 with kubeadm utility. 
+
+Take three CentOS 7 servers with minimal installation. One server will acts master node and rest two servers will be minion or worker nodes.
+
+Master Node components :-
+------------------------
+
+API Server  – It provides kubernetes API using Json / Yaml over http, states of API objects are stored in etcd
+
+Scheduler  – It is a program on master node which performs the scheduling tasks like launching containers in worker nodes based on resource availability
+
+Controller Manager – Main Job of Controller manager is to monitor replication controllers and create pods to maintain desired state.
+
+etcd – It is a Key value pair data base. It stores configuration data of cluster and cluster state.
+
+Kubectl utility – It is a command line utility which connects to API Server on port 6443. It is used by administrators to create pods, services etc.
+
+
+Worker Node Components :-
+--------------------------
+
+Kubelet – It is an agent which runs on every worker node, it connects to docker  and takes care of creating, starting, deleting containers.
+
+Kube-Proxy – It routes the traffic to appropriate containers based on ip address and port number of the incoming request. In other words we can say it is used for port translation.
+
+Pod – Pod can be defined as a multi-tier or group of containers that are deployed on a single worker node or docker host.
+
+
+Installation on Centos7 :-
+--------------------------
+Before installing check for ports 6443, 2379,2380, 10250-10255
+
+1.  Disable firewall & selinux
+	# setenforce 0
+	# sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+	
+	# firewall-cmd --permanent --add-port=6443/tcp
+	# firewall-cmd --permanent --add-port=2379-2380/tcp
+	# firewall-cmd --permanent --add-port=10250/tcp
+	# firewall-cmd --permanent --add-port=10251/tcp
+	# firewall-cmd --permanent --add-port=10252/tcp
+	# firewall-cmd --permanent --add-port=10255/tcp
+	# firewall-cmd --reload
+	# modprobe br_netfilter
+	# echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+
+	
+	Update under /etc/hosts
+	192.168.1.10 master
+	192.168.1.20 worker1
+	192.168.1.30 worker2
+
+
+2. Configure K8's Repository
+
+Add the below content in /etc/yum.repos.d/kubernetes.repo
+	
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+       https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+
+
+3. Install Kubeadm and Docker
+
+	# yum install kubeadm docker -y
+
+	# systemctl restart docker && systemctl enable docker
+	# systemctl  restart kubelet && systemctl enable kubelet
+
+
+4. Initialize Kubernetes Master with ‘kubeadm init’
+
+	# kubeadm init
+		(or)
+	# kubectl init --pod-network-cidr=10.244.0.0/16
+
+Output of the above command gives instructions to create a cluster and kubeadm join token which can use to add workers in cluster.
+		# mkdir -p $HOME/.kube
+		# cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+		# chown $(id -u):$(id -g) $HOME/.kube/config 
+
+
+5. Deploy Pod network to the cluster
+		
+	# kubectl get nodes
+	# kubectl get pods --all-namespaces
+
+
+	# export kubever=$(kubectl version | base64 | tr -d '\n')
+	# kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+	
+	
+
+	Verify the status 
+	# kubectl get nodes
+
+
+
+6. Disable selinux and firewall in "Worker Node"  as Step 1
+
+7. Configure Repository in "worker Node" as like step 2
+
+8. Install Kubeadm and Docker in "Worker Nodes" as like step 3
+
+9. Now Join Worker nodes to Master node. 
+
+	# kubeadm join --token a3bd48.1bc42347c3b35851 192.168.1.10:6443
+
+
+10. Now verify nodes in Master 
+
+	# kubectl get nodes
+
+
+
+Hello-World Service Deployment
+==============================
+
+kubectl apply -f https://k8s.io/examples/service/access/hello-application.yaml
+
+Ref:- https://kubernetes.io/docs/tasks/access-application-cluster/service-access-application-cluster/
+
+
+Kubernetes ingress-contoller
+============================
+https://medium.com/swlh/using-nginx-ingress-controllers-on-kubernetes-on-centos-7-99f6df969b45
+
+
+Extra:
+======
+kubeadm init --pod-network-cidr 10.244.0.0/16 --apiserver-advertise-address=192.168.99.112 kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+
+yum install bash-completion echo "source <(kubectl completion bash)" >> ~/.bashrc

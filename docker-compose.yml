@@ -1,0 +1,16 @@
+version:"3.8"
+services:
+  web:
+    build: ./path to docker file
+    ports:
+       - 3000:3000
+  api:
+ build: ./path to docker file
+    ports:
+       - 3001:3001
+     environment:
+      -DB_URL=mongodb://databse
+  databse:
+     image: mongo:4.0-xenial
+     ports:
+       - 27017:27017

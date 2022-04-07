@@ -1,7 +1,9 @@
 sudo apt update
 kali@kali:~$ sudo apt install -y docker.io
-kali@kali:~$
 kali@kali:~$ sudo systemctl enable docker --now
+kali@kali:~$ docker
+
+
 docker pull <imagename>
 docker images
 docker run -it -d --name <conatner name> <image name>
@@ -10,3 +12,66 @@ docker exec -ti <contaner name> bash
 
 docker ps
 docker commit <contaner id> <image name>
+
+docker image ls -q
+docker image rm id
+docker image rm $(docker image ls -q)
+docker container rm -f $(docker container ls -aq)
+
+docker compose up
+
+
+
+docker swarm init
+docker node ls
+docker info
+docker swarm join-token worker
+
+docker swarm leave(left swarm)
+docker node rm <id>
+
+
+docker service create --name demo --replicas 3 --publish 80:80 httpd
+docker service ls
+docker service ps demo
+decker service rm name
+docker service inspect --pretty demo
+
+#docker stack
+(yml file)
+docker stack deploy -c n.yml demo
+decker service scale <id> 4
+
+
+
+
+
+docker network ls
+
+docker network inspect bridge
+
+docker network create alpine-net
+
+Exit Container Shell
+===============
+Ctrl + p and Ctrl + q
+
+Default Bridge:
+============
+docker run -dit --name alpine1 alpine ash
+docker run -dit --name alpine2 alpine ash
+
+User Created Bridge:
+================
+
+docker run -dit --name alpine3 --net alpine-net alpine ash
+docker run -dit --name alpine4 --net alpine-net alpine ash
+
+None Network:
+===========
+docker run -dit --name alpine5 --net none alpine ash
+
+Host Network:
+===========
+docker run -dit --name alpine6 --net host alpine ash
+
