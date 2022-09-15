@@ -1,0 +1,16 @@
+trigger:
+  - main
+stages:
+  - stage : buildjob
+    jobs:
+     - job: buldjob
+       steps:
+         - script: echo "hello"
+  - stage : env
+    jobs:
+      - job: evvstp
+        steps:
+          - script: echo"hello again"
+      - job: rpt
+        steps:
+          - script: echo "job odne"
